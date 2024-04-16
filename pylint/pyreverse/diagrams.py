@@ -122,7 +122,7 @@ class ClassDiagram(Figure, FilterMixIn):
         """Return visible attributes, possibly with class name."""
         attrs = []
         properties = {
-            local_name: local_node
+            local_name: [local_node]
             for local_name, local_node in node.items()
             if isinstance(local_node, nodes.FunctionDef)
             and decorated_with_property(local_node)
@@ -167,6 +167,11 @@ class ClassDiagram(Figure, FilterMixIn):
         for node in nodes_lst:
             if isinstance(node, astroid.Instance):
                 node = node._proxied
+            if isinstance(node, astroid.FunctionDef):
+                node = node.returns
+                if node and not hasattr(node, "name"):
+                    node.name = node.as_string()
+
             if isinstance(
                 node, (nodes.ClassDef, nodes.Name, nodes.Subscript, nodes.BinOp)
             ) and hasattr(node, "name"):
