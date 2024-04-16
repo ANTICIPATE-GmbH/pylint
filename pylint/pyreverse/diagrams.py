@@ -240,15 +240,49 @@ class ClassDiagram(Figure, FilterMixIn):
     def assign_association_relationship(
         self, value: astroid.NodeNG, obj: ClassEntity, name: str, type_relationship: str
     ) -> None:
-        if isinstance(value, util.UninferableBase):
+        # Parse the syntax tree to find the associated object
+        # Subscript is used for generic types, e.g. list[str]
+        if isinstance(value, astroid.Subscript):
+            self.assign_association_relationship(
+                value.slice, obj, name, type_relationship
+            )
             return
-        if isinstance(value, astroid.Instance):
-            value = value._proxied
-        try:
-            associated_obj = self.object_from_node(value)
-            self.add_relationship(associated_obj, obj, type_relationship, name)
-        except KeyError:
+        # BinOp is used for union types, e.g. int | str
+        if isinstance(value, astroid.BinOp):
+            self.assign_association_relationship(
+                value.left, obj, name, type_relationship
+            )
+            self.assign_association_relationship(
+                value.right, obj, name, type_relationship
+            )
             return
+        # Tuple is used for tuple types, e.g. (str, int) or dict[str, int]
+        if isinstance(value, astroid.Tuple):
+            for elt in value.elts:
+                self.assign_association_relationship(elt, obj, name, type_relationship)
+            return
+
+        # Retrieve the associated object
+        # Name nodes are used for simple types, e.g. str but also for class names in union types
+        if isinstance(value, astroid.Name):
+            class_name = value.name
+            try:
+                associated_obj: DiagramEntity = self.classe(class_name)
+            except KeyError:
+                return
+        elif isinstance(value, util.UninferableBase):
+            return
+        else:
+            if isinstance(value, astroid.Instance):
+                value = value._proxied
+
+            try:
+                associated_obj = self.object_from_node(value)
+            except KeyError:
+                return
+
+        # Add the relationship to the diagram
+        self.add_relationship(associated_obj, obj, type_relationship, name)
 
 
 class PackageDiagram(ClassDiagram):
