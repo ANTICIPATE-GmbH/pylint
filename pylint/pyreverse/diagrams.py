@@ -167,13 +167,9 @@ class ClassDiagram(Figure, FilterMixIn):
         for node in nodes_lst:
             if isinstance(node, astroid.Instance):
                 node = node._proxied
-            if (
-                isinstance(
-                    node, (nodes.ClassDef, nodes.Name, nodes.Subscript, nodes.BinOp)
-                )
-                and hasattr(node, "name")
-                and not self.has_node(node)
-            ):
+            if isinstance(
+                node, (nodes.ClassDef, nodes.Name, nodes.Subscript, nodes.BinOp)
+            ) and hasattr(node, "name"):
                 if node.name not in names:
                     node_name = node.name
                     names.append(node_name)
