@@ -143,6 +143,8 @@ class DiagramWriter:
                 rel.to_object.fig_id,
                 label=rel.name,
                 type_=EdgeType.ASSOCIATION,
+                to_cardinality=rel.to_cardinality,
+                from_cardinality=rel.from_cardinality,
             )
         # generate aggregations
         for rel in diagram.get_relationships("aggregation"):
@@ -153,6 +155,8 @@ class DiagramWriter:
                 rel.to_object.fig_id,
                 label=rel.name,
                 type_=EdgeType.AGGREGATION,
+                to_cardinality=rel.to_cardinality,
+                from_cardinality=rel.from_cardinality,
             )
 
     def set_printer(self, file_name: str, basename: str) -> None:

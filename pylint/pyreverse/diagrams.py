@@ -32,12 +32,16 @@ class Relationship(Figure):
         to_object: DiagramEntity,
         relation_type: str,
         name: str | None = None,
+        from_cardinality: str | None = None,
+        to_cardinality: str | None = None,
     ):
         super().__init__()
         self.from_object = from_object
         self.to_object = to_object
         self.type = relation_type
         self.name = name
+        self.from_cardinality = from_cardinality
+        self.to_cardinality = to_cardinality
 
 
 class DiagramEntity(Figure):
@@ -105,9 +109,18 @@ class ClassDiagram(Figure, FilterMixIn):
         to_object: DiagramEntity,
         relation_type: str,
         name: str | None = None,
+        from_cardinality: str | None = None,
+        to_cardinality: str | None = None,
     ) -> None:
         """Create a relationship."""
-        rel = Relationship(from_object, to_object, relation_type, name)
+        rel = Relationship(
+            from_object,
+            to_object,
+            relation_type,
+            name,
+            from_cardinality,
+            to_cardinality,
+        )
         self.relationships.setdefault(relation_type, []).append(rel)
 
     def get_relationship(
@@ -247,32 +260,62 @@ class ClassDiagram(Figure, FilterMixIn):
                     )
 
     def assign_association_relationship(
-        self, value: astroid.NodeNG, obj: ClassEntity, name: str, type_relationship: str
+        self,
+        value: astroid.NodeNG,
+        obj: ClassEntity,
+        name: str,
+        type_relationship: str,
+        from_cardinality: str | None = None,
     ) -> None:
         # Parse the syntax tree to find the associated object
         # Subscript is used for generic types, e.g. list[str]
         if isinstance(value, astroid.Subscript):
+            if hasattr(value.value, "name"):
+                value_name = value.value.name
+            else:
+                value_name = ""
+            if value_name.lower() in {"list", "set", "dict"}:
+                from_cardinality = "*"
+            elif value_name.lower() in {"optional", "union"}:
+                from_cardinality = "0..1"
             self.assign_association_relationship(
-                value.slice, obj, name, type_relationship
+                value.slice,
+                obj,
+                name,
+                type_relationship,
+                from_cardinality=from_cardinality,
             )
             return
         # BinOp is used for union types, e.g. int | str
         if isinstance(value, astroid.BinOp):
+            from_cardinality = "0..1" if from_cardinality is None else from_cardinality
             self.assign_association_relationship(
-                value.left, obj, name, type_relationship
+                value.left,
+                obj,
+                name,
+                type_relationship,
+                from_cardinality=from_cardinality,
             )
             self.assign_association_relationship(
-                value.right, obj, name, type_relationship
+                value.right,
+                obj,
+                name,
+                type_relationship,
+                from_cardinality=from_cardinality,
             )
             return
-        # Tuple is used for tuple types, e.g. (str, int) or dict[str, int]
+        # Tuple is used for tuple types, e.g. (str, int) or the nested part of dict[str, int]
         if isinstance(value, astroid.Tuple):
+            from_cardinality = "1" if from_cardinality is None else from_cardinality
             for elt in value.elts:
-                self.assign_association_relationship(elt, obj, name, type_relationship)
+                self.assign_association_relationship(
+                    elt, obj, name, type_relationship, from_cardinality=from_cardinality
+                )
             return
 
         # Retrieve the associated object
         # Name nodes are used for simple types, e.g. str but also for class names in union types
+        from_cardinality = "1" if from_cardinality is None else from_cardinality
         if isinstance(value, astroid.Name):
             class_name = value.name
             try:
@@ -291,7 +334,13 @@ class ClassDiagram(Figure, FilterMixIn):
                 return
 
         # Add the relationship to the diagram
-        self.add_relationship(associated_obj, obj, type_relationship, name)
+        self.add_relationship(
+            associated_obj,
+            obj,
+            type_relationship,
+            name,
+            from_cardinality=from_cardinality,
+        )
 
     def get_annotations(self, node: nodes.ClassDef) -> list[str]:
         annotations = []

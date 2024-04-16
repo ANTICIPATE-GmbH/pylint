@@ -73,11 +73,19 @@ class MermaidJSPrinter(Printer):
         to_node: str,
         type_: EdgeType,
         label: str | None = None,
+        from_cardinality: str | None = None,
+        to_cardinality: str | None = None,
     ) -> None:
         """Create an edge from one node to another to display relationships."""
         from_node = from_node.split(".")[-1]
         to_node = to_node.split(".")[-1]
-        edge = f"{from_node} {self.ARROWS[type_]} {to_node}"
+        edge = f"{from_node} "
+        if from_cardinality:
+            edge += f'"{from_cardinality}" '
+        edge += f"{self.ARROWS[type_]} "
+        if to_cardinality:
+            edge += f'"{to_cardinality}" '
+        edge += to_node
         if label:
             edge += f" : {label}"
         self.emit(edge)
