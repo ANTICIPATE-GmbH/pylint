@@ -37,6 +37,7 @@ class Layout(Enum):
 
 class NodeProperties(NamedTuple):
     label: str
+    annotations: list[str] | None = None
     attrs: list[str] | None = None
     methods: list[nodes.FunctionDef] | None = None
     color: str | None = None

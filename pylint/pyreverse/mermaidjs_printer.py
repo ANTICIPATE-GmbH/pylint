@@ -46,7 +46,9 @@ class MermaidJSPrinter(Printer):
         if properties is None:
             properties = NodeProperties(label=name)
         nodetype = self.NODES[type_]
-        body = []
+        body: list[str] = []
+        if properties.annotations:
+            body.extend(f"<<{annotation}>>" for annotation in properties.annotations)
         if properties.attrs:
             body.extend(properties.attrs)
         if properties.methods:

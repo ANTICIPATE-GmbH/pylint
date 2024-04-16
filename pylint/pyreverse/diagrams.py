@@ -73,6 +73,7 @@ class ClassEntity(DiagramEntity):
 
     def __init__(self, title: str, node: nodes.ClassDef) -> None:
         super().__init__(title=title, node=node)
+        self.annotations: list[str] = []
         self.attrs: list[str] = []
         self.methods: list[nodes.FunctionDef] = []
 
@@ -214,6 +215,7 @@ class ClassDiagram(Figure, FilterMixIn):
         """Extract relationships between nodes in the diagram."""
         for obj in self.classes():
             node = obj.node
+            obj.annotations = self.get_annotations(node)
             obj.attrs = self.get_attrs(node)
             obj.methods = self.get_methods(node)
             obj.shape = "class"
@@ -290,6 +292,17 @@ class ClassDiagram(Figure, FilterMixIn):
 
         # Add the relationship to the diagram
         self.add_relationship(associated_obj, obj, type_relationship, name)
+
+    def get_annotations(self, node: nodes.ClassDef) -> list[str]:
+        annotations = []
+        # Enumerations
+        if "__members__" in node.locals:
+            annotations.append("Enumeration")
+        # Abstract classes
+        if any(base for base in node.bases if base.name == "ABC"):
+            annotations.append("Abstract")
+
+        return annotations
 
 
 class PackageDiagram(ClassDiagram):

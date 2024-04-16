@@ -171,6 +171,7 @@ class DiagramWriter:
         """Get label and shape for classes."""
         properties = NodeProperties(
             label=obj.title,
+            annotations=obj.annotations if not self.config.only_classnames else None,
             attrs=obj.attrs if not self.config.only_classnames else None,
             methods=obj.methods if not self.config.only_classnames else None,
             fontcolor="red" if is_exception(obj.node) else "black",
