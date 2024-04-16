@@ -140,6 +140,12 @@ class ClassDiagram(Figure, FilterMixIn):
             if names:
                 node_name = f"{node_name} : {', '.join(names)}"
             attrs.append(node_name)
+
+        # insert enum members if any
+        if "__members__" in node.locals:
+            for _, member_name in node.locals["__members__"][0].items:
+                attrs.append(member_name.name)
+
         return sorted(attrs)
 
     def get_methods(self, node: nodes.ClassDef) -> list[nodes.FunctionDef]:
