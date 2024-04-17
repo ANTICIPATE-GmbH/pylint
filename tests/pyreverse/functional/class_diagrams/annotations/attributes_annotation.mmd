@@ -11,3 +11,5 @@ classDiagram
     param : str
     union : Union[int, str]
   }
+  Dummy "0..1" --* Dummy2 : optional
+  Dummy "0..*" --* Dummy2 : class_attr

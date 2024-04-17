@@ -2,7 +2,7 @@
 set namespaceSeparator none
 class "Ancestor" as data.clientmodule_test.Ancestor #77AADD {
   attr : str
-  cls_member
+  cls_member : DoNothing
   get_value()
   set_value(value)
 }
@@ -32,8 +32,8 @@ class "PropertyPatterns" as data.property_pattern.PropertyPatterns #77AADD {
 }
 class "Specialization" as data.clientmodule_test.Specialization #77AADD {
   TYPE : str
-  relation
-  relation2
+  relation : DoNothing
+  relation2 : DoNothing2
   top : str
   from_value(value: int)
   increment_value() -> None

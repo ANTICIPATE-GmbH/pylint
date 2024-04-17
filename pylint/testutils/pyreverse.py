@@ -35,6 +35,7 @@ class PyreverseConfig(
         show_builtin: bool = False,
         show_stdlib: bool = False,
         module_names: bool | None = None,
+        grouped_modules: bool = False,
         only_classnames: bool = False,
         output_format: str = "dot",
         colorized: bool = False,
@@ -58,6 +59,7 @@ class PyreverseConfig(
         self.show_builtin = show_builtin
         self.show_stdlib = show_stdlib
         self.module_names = module_names
+        self.grouped_modules = grouped_modules
         self.only_classnames = only_classnames
         self.output_format = output_format
         self.colorized = colorized

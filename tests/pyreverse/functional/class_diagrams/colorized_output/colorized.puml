@@ -1,9 +1,9 @@
 @startuml classes
 set namespaceSeparator none
 class "CheckerCollector" as colorized.CheckerCollector #77AADD {
-  checker1
-  checker2
-  checker3
+  checker1 : ExceptionsChecker
+  checker2 : ElseifUsedChecker
+  checker3 : StdlibChecker
 }
 class "ElseifUsedChecker" as pylint.extensions.check_elif.ElseifUsedChecker #99DDFF {
   msgs : dict

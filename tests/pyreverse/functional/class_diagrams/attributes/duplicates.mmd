@@ -7,10 +7,10 @@ classDiagram
     bar() None
   }
   class DuplicateArrows {
-    a
+    a : A
   }
   class DuplicateFields {
     example1 : int
     example2 : int
   }
-  A --* DuplicateArrows : a
+  A "1" --* DuplicateArrows : a

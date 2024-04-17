@@ -6,7 +6,7 @@
         classDiagram
           class Ancestor {
             attr : str
-            cls_member
+            cls_member : DoNothing
             get_value()
             set_value(value)
           }
@@ -36,17 +36,17 @@
           }
           class Specialization {
             TYPE : str
-            relation
-            relation2
+            relation : DoNothing
+            relation2 : DoNothing2
             top : str
             from_value(value: int)
             increment_value() None
             transform_value(value: int) int
           }
           Specialization --|> Ancestor
-          DoNothing --* Ancestor : cls_member
-          DoNothing --* Specialization : relation
-          DoNothing2 --o Specialization : relation2
+          DoNothing "1" --* Ancestor : cls_member
+          DoNothing "1" --* Specialization : relation
+          DoNothing2 "1" --o Specialization : relation2
   
        </div>
   </body>
