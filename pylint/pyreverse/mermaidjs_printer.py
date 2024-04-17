@@ -40,8 +40,9 @@ class MermaidJSPrinter(Printer):
         title: str,
         layout: Layout | None = None,
         use_automatic_namespace: bool | None = None,
+        group_by_namespace: bool | None = None,
     ):
-        super().__init__(title, layout, use_automatic_namespace)
+        super().__init__(title, layout, use_automatic_namespace, group_by_namespace)
         self.last_namespace: str | None = None
 
     def _open_graph(self) -> None:
@@ -77,7 +78,7 @@ class MermaidJSPrinter(Printer):
                     line += f" {get_annotation_label(func.returns)}"
                 body.append(line)
         namespace = "-".join(name.split(".")[:-1])
-        if namespace != self.last_namespace and not self.use_automatic_namespace:
+        if namespace != self.last_namespace and not self.group_by_namespace:
             self.end_namespace()
             self.start_namespace(namespace)
         name = name.split(".")[-1]

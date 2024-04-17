@@ -53,10 +53,12 @@ class Printer(ABC):
         title: str,
         layout: Layout | None = None,
         use_automatic_namespace: bool | None = None,
+        group_by_namespace: bool | None = None,
     ) -> None:
         self.title: str = title
         self.layout = layout
         self.use_automatic_namespace = use_automatic_namespace
+        self.group_by_namespace = group_by_namespace
         self.lines: list[str] = []
         self._indent = ""
         self._open_graph()

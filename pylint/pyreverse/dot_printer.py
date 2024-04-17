@@ -60,10 +60,11 @@ class DotPrinter(Printer):
         title: str,
         layout: Layout | None = None,
         use_automatic_namespace: bool | None = None,
+        group_by_namespace: bool | None = None,
     ):
         layout = layout or Layout.BOTTOM_TO_TOP
         self.charset = "utf-8"
-        super().__init__(title, layout, use_automatic_namespace)
+        super().__init__(title, layout, use_automatic_namespace, group_by_namespace)
 
     def _open_graph(self) -> None:
         """Emit the header lines."""

@@ -162,7 +162,7 @@ class DiagramWriter:
     def set_printer(self, file_name: str, basename: str) -> None:
         """Set printer."""
         self.printer = self.printer_class(
-            basename, use_automatic_namespace=not self.config.grouped_modules
+            basename, group_by_namespace=not self.config.grouped_modules
         )
         self.file_name = file_name
 
