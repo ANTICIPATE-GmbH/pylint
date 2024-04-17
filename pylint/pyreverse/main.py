@@ -257,6 +257,15 @@ OPTIONS: Options = (
             "help": "Makes pyreverse more verbose/talkative. Mostly useful for debugging.",
         },
     ),
+    (
+        "grouped-modules",
+        {
+            "short": "g",
+            "action": "store_true",
+            "default": False,
+            "help": "Group classes in modules. (currently only supported for MermaidJS output)",
+        },
+    ),
 )
 
 

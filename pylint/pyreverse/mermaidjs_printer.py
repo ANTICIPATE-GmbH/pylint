@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 from pylint.pyreverse.diagrams import Cardinality
-from pylint.pyreverse.printer import EdgeType, NodeProperties, NodeType, Printer
+from pylint.pyreverse.printer import EdgeType, Layout, NodeProperties, NodeType, Printer
 from pylint.pyreverse.utils import get_annotation_label
 
 
@@ -34,6 +34,15 @@ class MermaidJSPrinter(Printer):
         Cardinality.ZERO_OR_MORE: "0..*",
         Cardinality.ONE_OR_MORE: "1..*",
     }
+
+    def __init__(
+        self,
+        title: str,
+        layout: Layout | None = None,
+        use_automatic_namespace: bool | None = None,
+    ):
+        super().__init__(title, layout, use_automatic_namespace)
+        self.last_namespace: str | None = None
 
     def _open_graph(self) -> None:
         """Emit the header lines."""
@@ -67,6 +76,10 @@ class MermaidJSPrinter(Printer):
                 if func.returns:
                     line += f" {get_annotation_label(func.returns)}"
                 body.append(line)
+        namespace = "-".join(name.split(".")[:-1])
+        if namespace != self.last_namespace and not self.use_automatic_namespace:
+            self.end_namespace()
+            self.start_namespace(namespace)
         name = name.split(".")[-1]
         self.emit(f"{nodetype} {name} {{")
         self._inc_indent()
@@ -85,6 +98,7 @@ class MermaidJSPrinter(Printer):
         to_cardinality: Cardinality | None = None,
     ) -> None:
         """Create an edge from one node to another to display relationships."""
+        self.end_namespace()
         from_node = from_node.split(".")[-1]
         to_node = to_node.split(".")[-1]
         edge = f"{from_node} "
@@ -97,6 +111,19 @@ class MermaidJSPrinter(Printer):
         if label:
             edge += f" : {label}"
         self.emit(edge)
+
+    def start_namespace(self, name: str) -> None:
+        """Create a namespace node."""
+        self.last_namespace = name
+        self.emit(f"namespace {name} {{")
+        self._inc_indent()
+
+    def end_namespace(self) -> None:
+        """Close the namespace node."""
+        if self.last_namespace:
+            self._dec_indent()
+            self.emit("}")
+            self.last_namespace = None
 
     def _close_graph(self) -> None:
         """Emit the lines needed to properly close the graph."""
