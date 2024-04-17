@@ -348,7 +348,9 @@ class ClassDiagram(Figure, FilterMixIn):
         if "__members__" in node.locals:
             annotations.append("Enumeration")
         # Abstract classes
-        if any(base for base in node.bases if base.name == "ABC"):
+        if any(
+            base for base in node.bases if hasattr(base, "name") and base.name == "ABC"
+        ):
             annotations.append("Abstract")
 
         return annotations
