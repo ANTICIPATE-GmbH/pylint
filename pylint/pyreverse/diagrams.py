@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import enum
 from collections.abc import Iterable
 from typing import Any
 
@@ -23,6 +24,14 @@ class Figure:
         self.fig_id: str = ""
 
 
+@enum.unique
+class Cardinality(enum.StrEnum):
+    ZERO_OR_ONE = "zero_or_one"
+    EXACTLY_ONE = "exactly_one"
+    ZERO_OR_MORE = "zero_or_more"
+    ONE_OR_MORE = "one_or_more"
+
+
 class Relationship(Figure):
     """A relationship from an object in the diagram to another."""
 
@@ -32,8 +41,8 @@ class Relationship(Figure):
         to_object: DiagramEntity,
         relation_type: str,
         name: str | None = None,
-        from_cardinality: str | None = None,
-        to_cardinality: str | None = None,
+        from_cardinality: Cardinality | None = None,
+        to_cardinality: Cardinality | None = None,
     ):
         super().__init__()
         self.from_object = from_object
@@ -109,8 +118,8 @@ class ClassDiagram(Figure, FilterMixIn):
         to_object: DiagramEntity,
         relation_type: str,
         name: str | None = None,
-        from_cardinality: str | None = None,
-        to_cardinality: str | None = None,
+        from_cardinality: Cardinality | None = None,
+        to_cardinality: Cardinality | None = None,
     ) -> None:
         """Create a relationship."""
         rel = Relationship(
@@ -265,7 +274,7 @@ class ClassDiagram(Figure, FilterMixIn):
         obj: ClassEntity,
         name: str,
         type_relationship: str,
-        from_cardinality: str | None = None,
+        from_cardinality: Cardinality | None = None,
     ) -> None:
         # Parse the syntax tree to find the associated object
         # Subscript is used for generic types, e.g. list[str]
@@ -275,9 +284,9 @@ class ClassDiagram(Figure, FilterMixIn):
             else:
                 value_name = ""
             if value_name.lower() in {"list", "set", "dict"}:
-                from_cardinality = "*"
+                from_cardinality = Cardinality.ZERO_OR_MORE
             elif value_name.lower() in {"optional", "union"}:
-                from_cardinality = "0..1"
+                from_cardinality = Cardinality.ZERO_OR_ONE
             self.assign_association_relationship(
                 value.slice,
                 obj,
@@ -288,7 +297,11 @@ class ClassDiagram(Figure, FilterMixIn):
             return
         # BinOp is used for union types, e.g. int | str
         if isinstance(value, astroid.BinOp):
-            from_cardinality = "0..1" if from_cardinality is None else from_cardinality
+            from_cardinality = (
+                Cardinality.ZERO_OR_ONE
+                if from_cardinality is None
+                else from_cardinality
+            )
             self.assign_association_relationship(
                 value.left,
                 obj,
@@ -306,7 +319,11 @@ class ClassDiagram(Figure, FilterMixIn):
             return
         # Tuple is used for tuple types, e.g. (str, int) or the nested part of dict[str, int]
         if isinstance(value, astroid.Tuple):
-            from_cardinality = "1" if from_cardinality is None else from_cardinality
+            from_cardinality = (
+                Cardinality.EXACTLY_ONE
+                if from_cardinality is None
+                else from_cardinality
+            )
             for elt in value.elts:
                 self.assign_association_relationship(
                     elt, obj, name, type_relationship, from_cardinality=from_cardinality
@@ -315,7 +332,9 @@ class ClassDiagram(Figure, FilterMixIn):
 
         # Retrieve the associated object
         # Name nodes are used for simple types, e.g. str but also for class names in union types
-        from_cardinality = "1" if from_cardinality is None else from_cardinality
+        from_cardinality = (
+            Cardinality.EXACTLY_ONE if from_cardinality is None else from_cardinality
+        )
         if isinstance(value, astroid.Name):
             class_name = value.name
             try:

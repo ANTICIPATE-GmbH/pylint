@@ -12,6 +12,7 @@ from typing import NamedTuple
 
 from astroid import nodes
 
+from pylint.pyreverse.diagrams import Cardinality
 from pylint.pyreverse.utils import get_annotation_label
 
 
@@ -98,8 +99,8 @@ class Printer(ABC):
         to_node: str,
         type_: EdgeType,
         label: str | None = None,
-        from_cardinality: str | None = None,
-        to_cardinality: str | None = None,
+        from_cardinality: Cardinality | None = None,
+        to_cardinality: Cardinality | None = None,
     ) -> None:
         """Create an edge from one node to another to display relationships."""
 

@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+from pylint.pyreverse.diagrams import Cardinality
 from pylint.pyreverse.printer import EdgeType, Layout, NodeProperties, NodeType, Printer
 from pylint.pyreverse.utils import get_annotation_label
 
@@ -87,8 +88,8 @@ class PlantUmlPrinter(Printer):
         to_node: str,
         type_: EdgeType,
         label: str | None = None,
-        from_cardinality: str | None = None,
-        to_cardinality: str | None = None,
+        from_cardinality: Cardinality | None = None,
+        to_cardinality: Cardinality | None = None,
     ) -> None:
         """Create an edge from one node to another to display relationships."""
         edge = f"{from_node} {self.ARROWS[type_]} {to_node}"

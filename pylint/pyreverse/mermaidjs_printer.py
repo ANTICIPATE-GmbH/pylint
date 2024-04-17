@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+from pylint.pyreverse.diagrams import Cardinality
 from pylint.pyreverse.printer import EdgeType, NodeProperties, NodeType, Printer
 from pylint.pyreverse.utils import get_annotation_label
 
@@ -25,6 +26,13 @@ class MermaidJSPrinter(Printer):
         EdgeType.AGGREGATION: "--o",
         EdgeType.USES: "-->",
         EdgeType.TYPE_DEPENDENCY: "..>",
+    }
+
+    CARDINALITIES: dict[Cardinality, str] = {
+        Cardinality.ZERO_OR_ONE: "0..1",
+        Cardinality.EXACTLY_ONE: "1",
+        Cardinality.ZERO_OR_MORE: "0..*",
+        Cardinality.ONE_OR_MORE: "1..*",
     }
 
     def _open_graph(self) -> None:
@@ -73,18 +81,18 @@ class MermaidJSPrinter(Printer):
         to_node: str,
         type_: EdgeType,
         label: str | None = None,
-        from_cardinality: str | None = None,
-        to_cardinality: str | None = None,
+        from_cardinality: Cardinality | None = None,
+        to_cardinality: Cardinality | None = None,
     ) -> None:
         """Create an edge from one node to another to display relationships."""
         from_node = from_node.split(".")[-1]
         to_node = to_node.split(".")[-1]
         edge = f"{from_node} "
         if from_cardinality:
-            edge += f'"{from_cardinality}" '
+            edge += f'"{self.CARDINALITIES[from_cardinality]}" '
         edge += f"{self.ARROWS[type_]} "
         if to_cardinality:
-            edge += f'"{to_cardinality}" '
+            edge += f'"{self.CARDINALITIES[to_cardinality]}" '
         edge += to_node
         if label:
             edge += f" : {label}"
