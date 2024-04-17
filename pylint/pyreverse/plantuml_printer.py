@@ -28,6 +28,13 @@ class PlantUmlPrinter(Printer):
         EdgeType.TYPE_DEPENDENCY: "..>",
     }
 
+    CARDINALITIES: dict[Cardinality, str] = {
+        Cardinality.ZERO_OR_ONE: "0..1",
+        Cardinality.EXACTLY_ONE: "1",
+        Cardinality.ZERO_OR_MORE: "0..*",
+        Cardinality.ONE_OR_MORE: "1..*",
+    }
+
     def _open_graph(self) -> None:
         """Emit the header lines."""
         self.emit("@startuml " + self.title)
@@ -92,7 +99,13 @@ class PlantUmlPrinter(Printer):
         to_cardinality: Cardinality | None = None,
     ) -> None:
         """Create an edge from one node to another to display relationships."""
-        edge = f"{from_node} {self.ARROWS[type_]} {to_node}"
+        edge = f"{from_node} "
+        if from_cardinality:
+            edge += f'"{self.CARDINALITIES[from_cardinality]}" '
+        edge += f"{self.ARROWS[type_]} "
+        if to_cardinality:
+            edge += f'"{self.CARDINALITIES[to_cardinality]}" '
+        edge += to_node
         if label:
             edge += f" : {label}"
         self.emit(edge)

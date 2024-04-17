@@ -12,6 +12,6 @@ class "Dummy2" as attributes_annotation.Dummy2 {
   param : str
   union : Union[int, str]
 }
-attributes_annotation.Dummy --* attributes_annotation.Dummy2 : optional
-attributes_annotation.Dummy --* attributes_annotation.Dummy2 : class_attr
+attributes_annotation.Dummy "0..1" --* attributes_annotation.Dummy2 : optional
+attributes_annotation.Dummy "0..*" --* attributes_annotation.Dummy2 : class_attr
 @enduml

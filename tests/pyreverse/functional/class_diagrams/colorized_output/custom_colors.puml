@@ -38,7 +38,7 @@ class "StdlibChecker" as pylint.checkers.stdlib.StdlibChecker #yellow {
   visit_ifexp(node: nodes.IfExp) -> None
   visit_unaryop(node: nodes.UnaryOp) -> None
 }
-pylint.checkers.exceptions.ExceptionsChecker --* custom_colors.CheckerCollector : checker1
-pylint.checkers.stdlib.StdlibChecker --* custom_colors.CheckerCollector : checker3
-pylint.extensions.check_elif.ElseifUsedChecker --* custom_colors.CheckerCollector : checker2
+pylint.checkers.exceptions.ExceptionsChecker "1" --* custom_colors.CheckerCollector : checker1
+pylint.checkers.stdlib.StdlibChecker "1" --* custom_colors.CheckerCollector : checker3
+pylint.extensions.check_elif.ElseifUsedChecker "1" --* custom_colors.CheckerCollector : checker2
 @enduml
