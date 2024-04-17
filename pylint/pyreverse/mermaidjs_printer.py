@@ -103,6 +103,89 @@ class MermaidJSPrinter(Printer):
         self._dec_indent()
 
 
+class ERMermaidJSPrinter(MermaidJSPrinter):
+    """Printer for ER MermaidJS diagrams."""
+
+    CARDINALITIES: dict[Cardinality, str] = {
+        Cardinality.ZERO_OR_ONE: "|o",
+        Cardinality.EXACTLY_ONE: "||",
+        Cardinality.ZERO_OR_MORE: "}o",
+        Cardinality.ONE_OR_MORE: "}|",
+    }
+
+    def _open_graph(self) -> None:
+        """Emit the header lines."""
+        self.emit("erDiagram")
+        self._inc_indent()
+
+    def emit_node(
+        self,
+        name: str,
+        type_: NodeType,
+        properties: NodeProperties | None = None,
+    ) -> None:
+        """Create a new node.
+
+        Nodes can be classes, packages, participants etc.
+        """
+        # pylint: disable=duplicate-code
+        if properties is None:
+            properties = NodeProperties(label=name)
+        body: list[str] = []
+        if properties.attrs:
+            for attribute in properties.attrs:
+                attribute_name = attribute.split(":")[0].strip()
+                attribute_type = (
+                    attribute.split(":")[1].strip() if ":" in attribute else "UNKNOWN"
+                )
+                if "|" in attribute_type:
+                    attribute_type = ", ".join(attribute_type.split("|"))
+                    attribute_type = f"Union[{attribute_type}]"
+                # Remove spaces from attribute type to avoid conflicts with mermaid syntax
+                # https://mermaid.js.org/syntax/entityRelationshipDiagram.html#attributes
+                attribute_type = attribute_type.replace(" ", "")
+                # Replace commas with dashes to avoid conflicts with mermaid syntax
+                # Can be removed once https://github.com/mermaid-js/mermaid/pull/5128 is merged
+                attribute_type = attribute_type.replace(",", "-")
+                body.append(f"{attribute_type} {attribute_name}")
+        name = name.split(".")[-1]
+        self.emit(f"{name} {{")
+        self._inc_indent()
+        for line in body:
+            self.emit(line)
+        self._dec_indent()
+        self.emit("}")
+
+    def emit_edge(
+        self,
+        from_node: str,
+        to_node: str,
+        type_: EdgeType,
+        label: str | None = None,
+        from_cardinality: Cardinality | None = None,
+        to_cardinality: Cardinality | None = None,
+    ) -> None:
+        """Create an edge from one node to another to display relationships."""
+        from_node = from_node.split(".")[-1]
+        to_node = to_node.split(".")[-1]
+        from_cardinality = (
+            Cardinality.ZERO_OR_MORE if from_cardinality is None else from_cardinality
+        )
+        to_cardinality = (
+            Cardinality.ZERO_OR_MORE if to_cardinality is None else to_cardinality
+        )
+        arrow = f"{self.CARDINALITIES[from_cardinality]}--{self._reverse_cardinality(to_cardinality)}"
+        edge = f"{from_node} {arrow} {to_node}"
+        if label:
+            edge += f" : {label}"
+        self.emit(edge)
+
+    def _reverse_cardinality(self, cardinality: Cardinality) -> str:
+        """Reverse the edge."""
+        cardinality_str = self.CARDINALITIES[cardinality]
+        return cardinality_str[::-1].replace("}", "{")
+
+
 class HTMLMermaidJSPrinter(MermaidJSPrinter):
     """Printer for MermaidJS diagrams wrapped in a html boilerplate."""
 

@@ -25,13 +25,7 @@ from pylint.pyreverse.utils import (
 )
 from pylint.typing import Options
 
-DIRECTLY_SUPPORTED_FORMATS = (
-    "dot",
-    "puml",
-    "plantuml",
-    "mmd",
-    "html",
-)
+DIRECTLY_SUPPORTED_FORMATS = ("dot", "puml", "plantuml", "mmd", "html", "er")
 
 DEFAULT_COLOR_PALETTE = (
     # colorblind scheme taken from https://personal.sron.nl/~pault/
