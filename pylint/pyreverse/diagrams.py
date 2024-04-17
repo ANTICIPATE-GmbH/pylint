@@ -194,12 +194,15 @@ class ClassDiagram(Figure, FilterMixIn):
         """Return class names if needed in diagram."""
         names = []
         for node in nodes_lst:
-            if isinstance(node, astroid.Instance):
-                node = node._proxied
             if isinstance(node, astroid.FunctionDef):
                 node = node.returns
                 if node and not hasattr(node, "name"):
                     node.name = node.as_string()
+
+            if isinstance(node, astroid.Instance):
+                node = node._proxied
+            if isinstance(node, astroid.Attribute):
+                node = node.expr
 
             if isinstance(
                 node, (nodes.ClassDef, nodes.Name, nodes.Subscript, nodes.BinOp)
