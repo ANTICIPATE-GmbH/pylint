@@ -210,13 +210,22 @@ class ClassDiagram(Figure, FilterMixIn):
             obj.attrs = self.get_attrs(node)
             obj.methods = self.get_methods(node)
             obj.shape = "class"
-            # inheritance link
-            for par_node in node.ancestors(recurs=False):
-                try:
-                    par_obj = self.object_from_node(par_node)
-                    self.add_relationship(obj, par_obj, "specialization")
-                except KeyError:
-                    continue
+            # inheritance links
+            for par_node in node.bases:
+                # Name nodes are used for simple types, e.g. class A(B):
+                if isinstance(par_node, astroid.Name):
+                    try:
+                        par_obj = self.classe(par_node.name)
+                        self.add_relationship(obj, par_obj, "specialization")
+                    except KeyError:
+                        continue
+                # Subscript is used for generic types, e.g. class A(Generic[T]):
+                if isinstance(par_node, astroid.Subscript):
+                    try:
+                        par_obj = self.classe(par_node.value.name)
+                        self.add_relationship(obj, par_obj, "specialization")
+                    except KeyError:
+                        continue
 
             # associations & aggregations links
             for name, values in list(node.aggregations_type.items()):
